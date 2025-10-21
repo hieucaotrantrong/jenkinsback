@@ -7,7 +7,7 @@ type CartItem = { item_id: number; quantity: number };
 type OrderItem = { item_id: number; title: string; quantity: number };
 type Order = { order_id: number; created_at: string; items: OrderItem[] };
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = ""; // Sửa dòng này: Bỏ "http://localhost:8000"
 
 // --- Main App Component ---
 export default function App() {
@@ -23,7 +23,7 @@ export default function App() {
       .then(r => r.ok ? r.json() : Promise.reject(r))
       .then(j => setItems(j.items || []))
       .catch(() => console.error("Failed to fetch items."));
-    
+
     // Fetch orders
     fetch(`${API_BASE}/api/orders`)
       .then(r => r.ok ? r.json() : Promise.reject(r))
@@ -115,16 +115,23 @@ export default function App() {
         {orders.length === 0 ? (
           <p>Chưa có đơn hàng nào.</p>
         ) : (
-          orders.map(order => (
-            <div key={order.order_id} className="order-card">
-              <h3>Đơn hàng #{order.order_id} - <small>{new Date(order.created_at).toLocaleString()}</small></h3>
-              <ul>
-                {order.items.map(item => (
-                  <li key={item.item_id}>{item.title} (x{item.quantity})</li>
-                ))}
-              </ul>
-            </div>
-          ))
+          orders.map(order => {
+            // Kiểm tra chắc chắn rằng 'order' và 'order.items' tồn tại
+            if (!order || !order.items) {
+              return null; // Bỏ qua nếu dữ liệu không hợp lệ
+            }
+            return (
+              <div key={order.order_id} className="order-card">
+                <h3>Đơn hàng #{order.order_id} - <small>{new Date(order.created_at).toLocaleString()}</small></h3>
+                <ul>
+                  {order.items.map(item => (
+                    // Dùng item.item_id trực tiếp vì đã kiểm tra ở trên
+                    <li key={item.item_id}>{item.title} (x{item.quantity})</li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })
         )}
       </div>
     </>

@@ -5,7 +5,6 @@ pipeline {
     DOCKER_USER    = "hieusenior1010"   
     BACKEND_IMAGE  = "backend"
     FRONTEND_IMAGE = "frontend"
-    DEPLOY_DIR     = "/opt/deploy/app"
   }
 
   options {
@@ -20,7 +19,7 @@ pipeline {
         checkout([$class: 'GitSCM',
           branches: [[name: '*/main']],
           userRemoteConfigs: [[
-            url: 'https://github.com/hieucaotrantrong/jenkinsback.git', // TODO: sửa
+            url: 'https://github.com/hieucaotrantrong/jenkinsback.git',
             credentialsId: 'github-pat'
           ]]
         ])
@@ -29,21 +28,13 @@ pipeline {
 
     stage('Build Backend Docker') {
       steps {
-        sh """
-          docker build \
-            -t docker.io/${DOCKER_USER}/${BACKEND_IMAGE}:latest \
-            -f backend/backend.Dockerfile .
-        """
+        sh "docker build -t docker.io/${DOCKER_USER}/${BACKEND_IMAGE}:latest -f backend/backend.Dockerfile ."
       }
     }
 
     stage('Build Frontend Docker') {
       steps {
-        sh """
-          docker build \
-            -t docker.io/${DOCKER_USER}/${FRONTEND_IMAGE}:latest \
-            -f frontend/Dockerfile .
-        """
+        sh "docker build -t docker.io/${DOCKER_USER}/${FRONTEND_IMAGE}:latest -f frontend/Dockerfile ."
       }
     }
 
@@ -59,19 +50,32 @@ pipeline {
       }
     }
 
-    stage('Deploy (same host)') {
+    stage('Deploy') {
       steps {
-        // đảm bảo compose có bản mới nhất
-        sh """
-          mkdir -p ${DEPLOY_DIR}
-        """
-        // docker-compose.yml đã đặt sẵn ở /opt/deploy/app theo bước 1.3
-        sh """
-          cd ${DEPLOY_DIR} && \
-          docker compose pull && \
-          docker compose up -d && \
-          docker image prune -f
-        """
+        script {
+          // Dừng và xóa các container cũ nếu có
+          sh 'docker stop backend frontend || true'
+          sh 'docker rm backend frontend || true'
+          
+          // 1. TẠO MỘT MẠNG CHUNG
+          sh 'docker network create my-app-network || true'
+
+          // 2. CHẠY CONTAINER BACKEND
+          // - Đặt tên là 'backend' (để Nginx tìm thấy)
+          // - Nối vào mạng 'my-app-network'
+          sh """
+            docker run -d --name backend --network my-app-network \\
+            docker.io/${DOCKER_USER}/${BACKEND_IMAGE}:latest
+          """
+
+          // 3. CHẠY CONTAINER FRONTEND
+          // - Nối vào cùng mạng 'my-app-network'
+          // - Mở cổng 80 để người dùng truy cập
+          sh """
+            docker run -d --name frontend -p 80:80 --network my-app-network \\
+            docker.io/${DOCKER_USER}/${FRONTEND_IMAGE}:latest
+          """
+        }
       }
     }
   }
