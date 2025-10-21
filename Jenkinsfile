@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_USER    = "thanhhub"   // TODO: sửa
+    DOCKER_USER    = "hieusenior1010"   
     BACKEND_IMAGE  = "backend"
     FRONTEND_IMAGE = "frontend"
     DEPLOY_DIR     = "/opt/deploy/app"
