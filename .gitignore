@@ -1,0 +1,44 @@
+# --- Python / Backend ---
+
+# Thư mục virtual environment
+backend/.venv/
+.venv/
+venv/
+
+# Cache của Python
+**/__pycache__/
+*.pyc
+
+# File database SQLite được tạo tự động
+backend/data.db
+
+
+# --- Node.js / Frontend ---
+
+# Thư mục chứa các thư viện đã cài đặt
+frontend/node_modules/
+
+# Thư mục chứa kết quả build của frontend
+frontend/dist/
+
+# Cache của Vite
+frontend/.vite/
+
+# Log files
+npm-debug.log*
+yarn-error.log
+yarn-debug.log
+
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+
+
+# --- Hệ điều hành ---
+.DS_Store
+Thumbs.db
+
+
+# --- Files tạm ---
+test.txt
