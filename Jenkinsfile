@@ -20,7 +20,7 @@ pipeline {
         checkout([$class: 'GitSCM',
           branches: [[name: '*/main']],
           userRemoteConfigs: [[
-            url: 'https://github.com/thanhhuynh1609/jenkins1.git', // TODO: sửa
+            url: 'https://github.com/hieucaotrantrong/jenkinsback.git', // TODO: sửa
             credentialsId: 'github-pat'
           ]]
         ])
